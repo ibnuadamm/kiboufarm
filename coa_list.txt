@@ -1,0 +1,25 @@
+ID: 1 | Kode: 1-101 | Nama: Kas | Tipe: Asset
+ID: 2 | Kode: 1-102 | Nama: Persediaan Ikan | Tipe: Asset
+ID: 4 | Kode: 2-101 | Nama: Hutang Usaha | Tipe: Liability
+ID: 5 | Kode: 3-101 | Nama: Modal | Tipe: Equity
+ID: 6 | Kode: 4-101 | Nama: Pendapatan Penjualan | Tipe: Revenue
+ID: 7 | Kode: 5-101 | Nama: Harga Pokok Penjualan | Tipe: Expense
+ID: 8 | Kode: 6-101 | Nama: Beban Operasional | Tipe: Expense
+ID: 9 | Kode: 6-102 | Nama: Susut Ikan | Tipe: Expense
+ID: 10 | Kode: 6-103 | Nama: Beban Pakan | Tipe: Expense
+ID: 11 | Kode: 6-104 | Nama: Beban Obat-Obatan | Tipe: Expense
+ID: 13 | Kode: 1-103 | Nama: Persediaan Pakan | Tipe: Asset
+ID: 14 | Kode: 1-104 | Nama: Persediaan Obat | Tipe: Asset
+ID: 15 | Kode: 1-105 | Nama: Persediaan Vitamin | Tipe: Asset
+ID: 19 | Kode: 1-102-01 | Nama: Persediaan Ikan Kolam 1 | Tipe: Asset
+ID: 20 | Kode: 1-102-02 | Nama: Persediaan Ikan Kolam 2 | Tipe: Asset
+ID: 21 | Kode: 1-102-03 | Nama: Persediaan Ikan Kolam 3 | Tipe: Asset
+ID: 22 | Kode: 1-102-04 | Nama: Persediaan Ikan Kolam 4 | Tipe: Asset
+ID: 23 | Kode: 1-102-05 | Nama: Persediaan Ikan Kolam 5 | Tipe: Asset
+ID: 24 | Kode: 1-102-06 | Nama: Persediaan Ikan Kolam 6 | Tipe: Asset
+ID: 25 | Kode: 1-102-07 | Nama: Persediaan Ikan Kolam 7 | Tipe: Asset
+ID: 26 | Kode: 1-102-08 | Nama: Persediaan Ikan Kolam 8 | Tipe: Asset
+ID: 27 | Kode: 1-102-09 | Nama: Persediaan Ikan Kolam 9 | Tipe: Asset
+ID: 28 | Kode: 1-102-10 | Nama: Persediaan Ikan Kolam 10 | Tipe: Asset
+ID: 29 | Kode: 6-201 | Nama: Beban Susut Ikan | Tipe: Expense
+ID: 30 | Kode: 5-100 | Nama: Beban Pokok Penjualan | Tipe: Expense

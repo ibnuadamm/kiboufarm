@@ -1,0 +1,15 @@
+--- START VERIFICATION ---
+Simulating Pakan Purchase...
+Pembelian Pakan created: ID 60
+[PASS] Journal created for Pakan.
+ - Akun: Persediaan Pakan | D: 50000.00 | K: 0.00
+ - Akun: Kas | D: 0.00 | K: 50000.00
+
+--------------------------------
+Simulating Bibit Purchase for Kolam 1...
+Pembelian Bibit created: ID 61
+[PASS] Journal created for Bibit.
+ - Akun: Persediaan Ikan Kolam 1 | D: 200000.00 | K: 0.00
+ - Akun: Kas | D: 0.00 | K: 200000.00
+
+--- ROLLED BACK (TEST MODE) ---
