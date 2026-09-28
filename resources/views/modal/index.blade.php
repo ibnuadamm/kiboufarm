@@ -16,9 +16,9 @@
     @endif
 
     <!-- Card Saldo Modal -->
-    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-8 mb-8 text-white">
-        <h2 class="text-lg font-semibold mb-2">Saldo Kas Saat Ini</h2>
-        <p class="text-4xl font-bold">Rp {{ number_format($modal->saldo_modal, 0, ',', '.') }}</p>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
+        <h2 class="text-lg font-semibold text-gray-500 mb-2">Saldo Kas Saat Ini</h2>
+        <p class="text-4xl font-bold text-gray-800">Rp {{ number_format($modal->saldo_modal, 0, ',', '.') }}</p>
     </div>
 
     <!-- Tabel Riwayat Setoran -->

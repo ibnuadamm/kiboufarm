@@ -8,7 +8,7 @@
         <select name="kolam_id" class="w-full border rounded p-2" required>
             <option value="">-- Pilih Kolam --</option>
             @foreach($kolams as $k)
-                <option value="{{ $k->id }}">Kolam #{{ $k->nomor_kolam }} (Populasi: {{ $k->jumlah }})</option>
+                <option value="{{ $k->id }}">Kolam {{ $k->nomor_kolam }} (Populasi: {{ $k->jumlah }})</option>
             @endforeach
         </select>
     </div>

@@ -27,9 +27,7 @@ class KolamController extends Controller
      */
     public function create()
     {
-        // Filter persediaan: Category 'Bibit' only
-        $bibits = Persediaan::where('kategori', 'Bibit')->get();
-        return view('kolam.create', compact('bibits'));
+        return view('kolam.create');
     }
 
     /**
@@ -38,37 +36,22 @@ class KolamController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nomor_kolam' => [
-                'required',
-                'integer',
-                // Custom validation: check if active cycle exists for this pond number
-                function ($attribute, $value, $fail) {
-                    $activeCycleExists = Kolam::where('nomor_kolam', $value)
-                        ->where('status', '!=', 'panen')
-                        ->exists();
-                    
-                    if ($activeCycleExists) {
-                        $fail('Kolam nomor ' . $value . ' masih aktif (belum panen). Tidak bisa membuat siklus baru.');
-                    }
-                },
-            ],
-            'persediaan_id' => 'required|exists:persediaans,id',
-            'tanggal_tebar' => 'required|date',
-            'jumlah' => 'required|integer|min:1',
-            'ukuran_ikan' => 'required|string|max:255',
+            'nomor_kolam' => 'required|integer|unique:kolam,nomor_kolam',
         ]);
 
         Kolam::create([
             'nomor_kolam' => $request->nomor_kolam,
-            'persediaan_id' => $request->persediaan_id,
-            'tanggal_tebar' => $request->tanggal_tebar,
-            'jumlah' => $request->jumlah,
-            'ukuran_ikan' => $request->ukuran_ikan,
-            'status' => 'masuk_bibit', // Default status
+            'persediaan_id' => null,
+            'tanggal_tebar' => null,
+            'jumlah' => 0,
+            'jumlah_tebar' => 0,
+            'jumlah_mati' => 0,
+            'ukuran_ikan' => null,
+            'status' => 'kosong', // Default status
         ]);
 
         return redirect()->route('kolam.index')
-            ->with('success', 'Siklus Kolam berhasil dibuat.');
+            ->with('success', 'Kolam baru berhasil didaftarkan dengan status Kosong.');
     }
 
     /**
@@ -78,7 +61,37 @@ class KolamController extends Controller
     {
         return view('kolam.show', compact('kolam'));
     }
-    
-    // ... (Show method)
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Kolam $kolam)
+    {
+        return view('kolam.edit', compact('kolam'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Kolam $kolam)
+    {
+        $request->validate([
+            'status' => 'required|in:panen',
+        ]);
+
+        $updateData = [
+            'status' => 'panen',
+        ];
+
+        // Jika status sebelumnya bukan panen, isi tanggal_panen otomatis dengan hari ini
+        if ($kolam->status !== 'panen') {
+            $updateData['tanggal_panen'] = now()->toDateString();
+        }
+
+        $kolam->update($updateData);
+
+        return redirect()->route('kolam.index')
+            ->with('success', 'Status kolam berhasil diubah menjadi Panen.');
+    }
 
 }

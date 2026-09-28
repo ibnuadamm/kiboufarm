@@ -21,12 +21,7 @@ class PembelianObserver
             ]);
 
             // 1b. Jika Bibit & Pilih Kolam -> Update Bibit Kolam
-            // Note: kolam_id might be on Pembelian (per user request context) or via relation?
-            // Checking table schema: pembelians table doesn't formally have kolam_id in the migration I saw (2026_01_17_182327_create_pembelians_table.php),
-            // but the Model has it in fillable, and observer uses it. 
-            // Assuming the column exists (maybe added in a later migration I didn't see or manually).
-            // Logic below assumes $pembelian->kolam_id works.
-            
+            $kolam = null;
             if ($persediaan->kategori === 'Bibit' && $pembelian->kolam_id) {
                 $kolam = \App\Models\Kolam::find($pembelian->kolam_id);
                 if ($kolam) {
@@ -40,61 +35,57 @@ class PembelianObserver
             $modal->kurangiModal($pembelian->total_harga);
 
             // 3. JURNAL OTOMATIS
-            $namaAkunPersediaan = 'Persediaan'; // Fallback
+            $namaCoaPersediaan = 'Persediaan'; // Fallback
             $kategori = $persediaan->kategori;
             
-            // Tentukan Nama Akun Target
+            // Tentukan Nama COA Target
             if ($kategori === 'Bibit') {
                 if ($pembelian->kolam_id) {
-                    $kolam = \App\Models\Kolam::find($pembelian->kolam_id);
                     if ($kolam) {
-                        $namaAkunPersediaan = "Persediaan Ikan Kolam " . $kolam->nomor_kolam;
-                    } 
+                        $namaCoaPersediaan = "Persediaan Bibit Kolam " . $kolam->nomor_kolam;
+                    }
                 } else {
-                     $namaAkunPersediaan = "Persediaan Bibit";
+                     $namaCoaPersediaan = "Persediaan Bibit";
                 }
             } elseif ($kategori === 'Pakan') {
-                $namaAkunPersediaan = 'Persediaan Pakan';
+                $namaCoaPersediaan = 'Persediaan Pakan';
             } elseif ($kategori === 'Obat') {
-                $namaAkunPersediaan = 'Persediaan Obat';
+                $namaCoaPersediaan = 'Persediaan Obat';
             } elseif ($kategori === 'Vitamin') {
-                $namaAkunPersediaan = 'Persediaan Vitamin';
+                $namaCoaPersediaan = 'Persediaan Vitamin';
             }
 
-            // Cari atau Buat Akun Persediaan
-            $akunPersediaan = \App\Models\Akun::where('nama', $namaAkunPersediaan)->first();
+            // Cari atau Buat COA Persediaan
+            $coaPersediaan = \App\Models\Coa::where('nama', $namaCoaPersediaan)->first();
             
-            if (!$akunPersediaan) {
-                // Auto Create Akun jika tidak ada
-                $latestCode = \App\Models\Akun::where('kode', 'like', '1-2%')
-                    ->orderByRaw('LENGTH(kode) DESC')
-                    ->orderBy('kode', 'desc')
-                    ->first();
-                
-                // Simple logic generate kode baru (takut duplikat, pakai timestamp suffix safe-guard)
-                // Idealnya: parse last code.
-                $newCodeSuffix = rand(100, 999);
-                $newCode = '1-200-' . $newCodeSuffix; 
-                
-                if ($latestCode) {
-                    // Try to increment last part? 
-                    // Too risky to parse unknown format. stick to random/time suffix or standard.
-                    // Or let's just make it '1-2xx' if we can.
-                    //$newCode = '1-2' . str_pad((string)rand(10, 99), 2, '0', STR_PAD_LEFT) . '-' . rand(1,99);
+            if (!$coaPersediaan) {
+                $newCode = '1130'; // Fallback
+                if ($kategori === 'Bibit') {
+                    if ($pembelian->kolam_id && $kolam) {
+                        $newCode = '1131' . $kolam->nomor_kolam;
+                    } else {
+                        $newCode = '11310';
+                    }
+                } elseif ($kategori === 'Vitamin') {
+                    $newCode = '1132';
+                } elseif ($kategori === 'Obat') {
+                    $newCode = '1133';
+                } elseif ($kategori === 'Pakan') {
+                    $newCode = '1134';
                 }
+
+                \Illuminate\Support\Facades\Log::info("Auto Creating COA: $namaCoaPersediaan with Code $newCode");
                 
-                \Illuminate\Support\Facades\Log::info("Auto Creating Account: $namaAkunPersediaan with Code $newCode");
-                
-                $akunPersediaan = \App\Models\Akun::create([
+                $coaPersediaan = \App\Models\Coa::create([
                     'kode' => $newCode,
-                    'nama' => $namaAkunPersediaan,
+                    'nama' => $namaCoaPersediaan,
                     'tipe' => 'Asset',
                 ]);
             }
 
-            $akunKas = \App\Models\Akun::where('nama', 'Kas')->first();
+            $coaKas = \App\Models\Coa::where('nama', 'Kas')->first();
             
-            if ($akunPersediaan && $akunKas) {
+            if ($coaPersediaan && $coaKas) {
                 $jurnal = \App\Models\Jurnal::create([
                     'tanggal' => $pembelian->tanggal_pembelian,
                     'keterangan' => 'Pembelian ' . $kategori . ': ' . $persediaan->nama_barang,
@@ -105,7 +96,7 @@ class PembelianObserver
                 // Debit Persediaan (Bertambah)
                 \App\Models\JurnalDetail::create([
                     'jurnal_id' => $jurnal->id,
-                    'akun_id' => $akunPersediaan->id,
+                    'coa_id' => $coaPersediaan->id,
                     'debit' => $pembelian->total_harga,
                     'kredit' => 0,
                 ]);
@@ -113,14 +104,14 @@ class PembelianObserver
                 // Kredit Kas (Berkurang)
                 \App\Models\JurnalDetail::create([
                     'jurnal_id' => $jurnal->id,
-                    'akun_id' => $akunKas->id,
+                    'coa_id' => $coaKas->id,
                     'debit' => 0,
                     'kredit' => $pembelian->total_harga,
                 ]);
                 
-                 \Illuminate\Support\Facades\Log::info("Journal Created: Debit $namaAkunPersediaan, Kredit Kas");
+                 \Illuminate\Support\Facades\Log::info("Journal Created: Debit $namaCoaPersediaan, Kredit Kas");
             } else {
-                 \Illuminate\Support\Facades\Log::warning('Accounts missing for journal creation (Kas missing?).');
+                 \Illuminate\Support\Facades\Log::warning('COA missing for journal creation (Kas missing?).');
             }
         }
     }

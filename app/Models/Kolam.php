@@ -42,18 +42,18 @@ class Kolam extends Model
     // Helper Method for HPP Logic (Yield Costing)
     public function calculateHppPerEkor()
     {
-        $pondAccountName = "Persediaan Ikan Kolam " . $this->nomor_kolam;
-        $akunPond = \App\Models\Akun::where('nama', $pondAccountName)->first();
+        $pondAccountName = "Persediaan Bibit Kolam " . $this->nomor_kolam;
+        $coaPond = \App\Models\Coa::where('nama', $pondAccountName)->first();
 
-        if (!$akunPond) return 0;
+        if (!$coaPond) return 0;
 
         // 1. Net Asset Value (Debit - Credit)
-        $debitTotal = \App\Models\JurnalDetail::where('akun_id', $akunPond->id)->sum('debit');
-        $kreditTotal = \App\Models\JurnalDetail::where('akun_id', $akunPond->id)->sum('kredit');
+        $debitTotal = \App\Models\JurnalDetail::where('coa_id', $coaPond->id)->sum('debit');
+        $kreditTotal = \App\Models\JurnalDetail::where('coa_id', $coaPond->id)->sum('kredit');
         $netValue = $debitTotal - $kreditTotal;
 
         // 2. Add Back Death Credits (Yield Logic: Survivors absorb death cost)
-        $deathCredits = \App\Models\JurnalDetail::where('akun_id', $akunPond->id)
+        $deathCredits = \App\Models\JurnalDetail::where('coa_id', $coaPond->id)
             ->whereHas('jurnal', function($q) {
                 $q->where('ref_type', \App\Models\KematianIkan::class);
             })

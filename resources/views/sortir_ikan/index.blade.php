@@ -32,8 +32,8 @@
                 @forelse($sortirs as $s)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 text-sm text-gray-700">{{ $s->tanggal->format('d M Y') }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 font-bold">Kolam #{{ $s->kolamAsal->nomor_kolam }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 font-bold">Kolam #{{ $s->kolamTujuan->nomor_kolam }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 font-bold">Kolam {{ $s->kolamAsal->nomor_kolam }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 font-bold">Kolam {{ $s->kolamTujuan->nomor_kolam }}</td>
                         <td class="px-6 py-4 text-right text-sm text-gray-900 font-bold">{{ number_format($s->jumlah) }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700">{{ $s->ukuran_ikan_tujuan }}</td>
                         <td class="px-6 py-4 text-sm text-gray-500">{{ $s->catatan ?? '-' }}</td>

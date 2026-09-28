@@ -2,42 +2,60 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Akun;
+use App\Models\Coa;
 use App\Models\JurnalDetail;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class BukuBesarController extends Controller
 {
     public function index(Request $request)
     {
-        $akuns = Akun::orderBy('kode')->get();
-        $selectedAkun = null;
+        $coas = Coa::orderBy('kode')->get();
+        $selectedCoa = null;
         $details = collect();
+        $saldoAwal = 0;
         
-        if ($request->has('akun_id') && $request->akun_id) {
-            $selectedAkun = Akun::find($request->akun_id);
+        $bulan = $request->input('bulan', date('m'));
+        $tahun = $request->input('tahun', date('Y'));
+
+        if ($request->has('coa_id') && $request->coa_id) {
+            $selectedCoa = Coa::find($request->coa_id);
             
-            if ($selectedAkun) {
-                $query = JurnalDetail::with(['jurnal'])
-                    ->where('akun_id', $selectedAkun->id)
-                    ->whereHas('jurnal', function($q) use ($request) {
-                        if ($request->start_date) {
-                            $q->where('tanggal', '>=', $request->start_date);
-                        }
-                        if ($request->end_date) {
-                            $q->where('tanggal', '<=', $request->end_date);
-                        }
+            if ($selectedCoa) {
+                $isDebitNormal = in_array($selectedCoa->tipe, ['Asset', 'Expense']);
+
+                $startDate = Carbon::create($tahun, $bulan, 1)->startOfMonth();
+                $endDate = Carbon::create($tahun, $bulan, 1)->endOfMonth();
+
+                // Calculate Saldo Awal
+                $saldoAwalQuery = JurnalDetail::where('coa_id', $selectedCoa->id)
+                    ->whereHas('jurnal', function($q) use ($startDate) {
+                        $q->where('tanggal', '<', $startDate);
+                    })->get();
+
+                $totalDebitAwal = $saldoAwalQuery->sum('debit');
+                $totalKreditAwal = $saldoAwalQuery->sum('kredit');
+
+                if ($isDebitNormal) {
+                    $saldoAwal = $totalDebitAwal - $totalKreditAwal;
+                } else {
+                    $saldoAwal = $totalKreditAwal - $totalDebitAwal;
+                }
+
+                // Get transactions for the current month
+                $query = JurnalDetail::with(['jurnal', 'coa'])
+                    ->where('coa_id', $selectedCoa->id)
+                    ->whereHas('jurnal', function($q) use ($startDate, $endDate) {
+                        $q->whereBetween('tanggal', [$startDate, $endDate]);
                     });
                 
-                // Get all records to calculate running balance correctly
-                // Sorting: Oldest first to calculate balance, then we can display newest first if needed?
-                // Usually Ledger is displayed Oldest -> Newest.
                 $details = $query->get()->sortBy(function($detail) {
                     return $detail->jurnal->tanggal . '-' . $detail->jurnal->created_at;
                 });
             }
         }
 
-        return view('buku_besar.index', compact('akuns', 'selectedAkun', 'details'));
+        return view('buku_besar.index', compact('coas', 'selectedCoa', 'details', 'saldoAwal', 'bulan', 'tahun'));
     }
 }

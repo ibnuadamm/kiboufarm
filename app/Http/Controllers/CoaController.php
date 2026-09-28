@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Akun;
+use App\Models\Coa;
 use Illuminate\Http\Request;
 
 class CoaController extends Controller
@@ -12,8 +12,8 @@ class CoaController extends Controller
      */
     public function index()
     {
-        $akuns = Akun::orderBy('kode', 'asc')->paginate(20);
-        return view('coa.index', compact('akuns'));
+        $coas = Coa::orderBy('kode', 'asc')->paginate(20);
+        return view('coa.index', compact('coas'));
     }
 
     /**
@@ -30,20 +30,20 @@ class CoaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kode' => 'required|string|unique:akuns,kode|max:20',
+            'kode' => 'required|string|unique:coas,kode|max:20',
             'nama' => 'required|string|max:255',
             'tipe' => 'required|string',
         ]);
 
-        Akun::create($request->all());
+        Coa::create($request->all());
 
-        return redirect()->route('coa.index')->with('success', 'Akun berhasil ditambahkan.');
+        return redirect()->route('coa.index')->with('success', 'COA berhasil ditambahkan.');
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Akun $coa) // Route parameter likely 'coa'
+    public function edit(Coa $coa)
     {
         return view('coa.edit', compact('coa'));
     }
@@ -51,26 +51,32 @@ class CoaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Akun $coa)
+    public function update(Request $request, Coa $coa)
     {
         $request->validate([
-            'kode' => 'required|string|max:20|unique:akuns,kode,' . $coa->id,
+            'kode' => 'required|string|max:20|unique:coas,kode,' . $coa->id,
             'nama' => 'required|string|max:255',
             'tipe' => 'required|string',
         ]);
 
         $coa->update($request->all());
 
-        return redirect()->route('coa.index')->with('success', 'Akun berhasil diperbarui.');
+        return redirect()->route('coa.index')->with('success', 'COA berhasil diperbarui.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Akun $coa)
+    public function destroy(Coa $coa)
     {
-        // Prevent deletion of system accounts if needed, but for now simple delete
-        $coa->delete();
-        return redirect()->route('coa.index')->with('success', 'Akun berhasil dihapus.');
+        try {
+            $coa->delete();
+            return redirect()->route('coa.index')->with('success', 'COA berhasil dihapus.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return redirect()->route('coa.index')->with('error', 'COA tidak dapat dihapus karena sudah memiliki riwayat transaksi di jurnal.');
+            }
+            throw $e;
+        }
     }
 }

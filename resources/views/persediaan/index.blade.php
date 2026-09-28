@@ -40,12 +40,8 @@
                         <td class="px-6 py-4 text-center text-red-600 cursor-help" title="Total Penjualan/Pemakaian">{{ $item->stok_keluar }}</td>
                         <td class="px-6 py-4 text-center font-bold text-gray-900 bg-brand-50/50">{{ $item->stok_sisa }}</td>
                         <td class="px-6 py-4 text-right">
-                            <div class="flex justify-end space-x-2">
+                            <div class="flex justify-end">
                                 <a href="{{ route('persediaan.edit', $item) }}" class="text-gray-500 hover:text-brand-600 p-1 bg-gray-100 hover:bg-brand-50 rounded">Edit</a>
-                                <form action="{{ route('persediaan.destroy', $item) }}" method="POST" onsubmit="return confirm('Hapus barang ini?');" class="inline">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="text-gray-500 hover:text-red-600 p-1 bg-gray-100 hover:bg-red-50 rounded">Hapus</button>
-                                </form>
                             </div>
                         </td>
                     </tr>

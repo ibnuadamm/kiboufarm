@@ -22,8 +22,8 @@ class PenjualanController extends Controller
      */
     public function create()
     {
-        // Get active ponds only for harvest selection
-        $kolams = Kolam::where('status', '!=', 'panen')->get();
+        // Get harvested ponds only for harvest selection
+        $kolams = Kolam::where('status', 'panen')->get();
         $pelanggans = \App\Models\Pelanggan::orderBy('nama')->get();
         return view('penjualan.create', compact('kolams', 'pelanggans'));
     }

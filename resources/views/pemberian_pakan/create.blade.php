@@ -20,7 +20,7 @@
                     <select name="kolam_id" class="w-full rounded-lg border-gray-300 focus:border-brand-500 focus:ring-brand-500" required>
                         <option value="">-- Pilih Kolam Aktif --</option>
                         @foreach($kolams as $kolam)
-                            <option value="{{ $kolam->id }}">Kolam #{{ $kolam->nomor_kolam }} ({{ ucfirst(str_replace('_', ' ', $kolam->status)) }})</option>
+                            <option value="{{ $kolam->id }}">Kolam {{ $kolam->nomor_kolam }} ({{ ucfirst(str_replace('_', ' ', $kolam->status)) }})</option>
                         @endforeach
                     </select>
                 </div>

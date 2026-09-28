@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Data Pembelian Barang')
+@section('title', 'Data Pembelian Pakan dan Bibit')
 
 @section('content')
     <div class="mb-6 flex justify-between items-center">
@@ -18,7 +18,7 @@
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold tracking-wider">
                     <th class="px-6 py-4">Tanggal</th>
-                    <th class="px-6 py-4">Barang</th>
+                    <th class="px-6 py-4">Produk</th>
                     <th class="px-6 py-4 text-center">Jumlah</th>
                     <th class="px-6 py-4 text-right">Harga Satuan</th>
                     <th class="px-6 py-4 text-right">Total Harga</th>

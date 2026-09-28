@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Akun;
+use App\Models\Coa;
 use App\Models\JurnalDetail;
 use Illuminate\Http\Request;
 
@@ -14,116 +14,94 @@ class LabaRugiController extends Controller
         $startDate = $request->start_date ?? date('Y-m-01');
         $endDate = $request->end_date ?? date('Y-m-t');
 
-        // 1. PENDAPATAN (REVENUE) - From Jurnal
-        $pendapatanAccounts = Akun::where('tipe', 'Revenue')->orderBy('kode')->get();
-        $totalPendapatan = 0;
+        // 1. PENDAPATAN (REVENUE) - From Pendapatan Bersih Seluruh Kolam
+        // Menghitung total penjualan
+        $totalPenjualan = \App\Models\Penjualan::whereBetween('tanggal_penjualan', [$startDate, $endDate])->sum('total_harga');
 
-        foreach ($pendapatanAccounts as $akun) {
-            $kredit = JurnalDetail::where('akun_id', $akun->id)
-                ->whereHas('jurnal', function ($q) use ($startDate, $endDate) {
-                    $q->whereBetween('tanggal', [$startDate, $endDate]);
-                })->sum('kredit');
-
-            $debit = JurnalDetail::where('akun_id', $akun->id)
+        // Menghitung total beban (Pakan, Obat, Vitamin) untuk seluruh kolam
+        $calculateUsageValue = function ($category) use ($startDate, $endDate) {
+            $accountNamePrefix = "Beban {$category}%";
+            return \App\Models\JurnalDetail::whereHas('coa', function ($q) use ($accountNamePrefix) {
+                    $q->where('nama', 'LIKE', $accountNamePrefix); 
+                })
                 ->whereHas('jurnal', function ($q) use ($startDate, $endDate) {
                     $q->whereBetween('tanggal', [$startDate, $endDate]);
                 })->sum('debit');
+        };
 
-            $akun->saldo_periode = $kredit - $debit;
-            $totalPendapatan += $akun->saldo_periode;
-        }
+        $totalBebanPakan = $calculateUsageValue('Pakan');
+        $totalBebanObat = $calculateUsageValue('Obat');
+        $totalBebanVitamin = $calculateUsageValue('Vitamin');
 
-        // 2. HPP COMPONENTS (Custom Logic as per User Request)
-        // Bibit (From Pembelian), Pakan/Obat/Vitamin (From Pemberian Usage)
-        
-        $hppComponents = [
-            'Bibit' => 0,
-            'Pakan' => 0,
-            'Obat' => 0,
-            'Vitamin' => 0,
-        ];
+        // Tambahan Beban Kematian & Bibit
+        $totalBebanKematian = \App\Models\JurnalDetail::whereHas('coa', function($q) {
+                $q->where('nama', 'Beban Kematian Ikan')->orWhere('nama', 'Susut Ikan');
+            })
+            ->whereHas('jurnal', function($q) use ($startDate, $endDate) {
+                $q->whereBetween('tanggal', [$startDate, $endDate])
+                  ->where('ref_type', \App\Models\KematianIkan::class);
+            })->sum('debit');
 
-        // A. Bibit: Sum of Purchases
-        $hppComponents['Bibit'] = \App\Models\Pembelian::whereHas('persediaan', function ($q) {
+        $totalBebanBibit = \App\Models\Pembelian::whereHas('persediaan', function ($q) {
                 $q->where('kategori', 'Bibit');
             })
             ->whereBetween('tanggal_pembelian', [$startDate, $endDate])
             ->sum('total_harga');
 
-        // B. Usage (Pakan, Obat, Vitamin)
-        // Helper to calculate Usage Value
-        $calculateUsageValue = function ($category) use ($startDate, $endDate) {
-            $totalValue = 0;
-            // Get all Usages for this category in date range
-            $usages = \App\Models\PemberianPakan::whereHas('persediaan', function ($q) use ($category) {
-                    $q->where('kategori', $category);
-                })
-                ->whereBetween('tanggal', [$startDate, $endDate])
-                ->with('persediaan.pembelians')
-                ->get();
+        $totalAllBeban = $totalBebanPakan + $totalBebanObat + $totalBebanVitamin + $totalBebanKematian + $totalBebanBibit;
+        $pendapatanBersih = $totalPenjualan - $totalAllBeban;
+        // Buat mock object supaya sesuai dengan tampilan blade yang iterasi foreach ($pendapatanAccounts as $coa)
+        $pendapatanAccounts = [
+            (object) [
+                'kode' => '-',
+                'nama' => 'Pendapatan Bersih Seluruh Kolam',
+                'saldo_periode' => $pendapatanBersih
+            ]
+        ];
 
-            foreach ($usages as $usage) {
-                // Calculate Avg Cost for this Persediaan
-                // Simple Avg: Total Purchase Cost / Total Purchase Qty
-                $pembelians = $usage->persediaan->pembelians; 
-                $totalCost = $pembelians->sum('total_harga');
-                $totalQty = $pembelians->sum('jumlah');
-                
-                $avgPrice = ($totalQty > 0) ? ($totalCost / $totalQty) : 0;
-                
-                $totalValue += ($usage->jumlah * $avgPrice);
-            }
-            return $totalValue;
-        };
+        $totalPendapatan = $pendapatanBersih;
 
-        $hppComponents['Pakan'] = $calculateUsageValue('Pakan');
-        $hppComponents['Obat'] = $calculateUsageValue('Obat');
-        $hppComponents['Vitamin'] = $calculateUsageValue('Vitamin');
-
-        $totalHPP = array_sum($hppComponents);
+        // 2. HARGA POKOK PENJUALAN (HPP) - Dihapus sesuai request
+        $totalHPP = 0;
 
         // 3. BEBAN OPERASIONAL (EXPENSE) - From Jurnal
-        // Exclude HPP accounts if any mapped there, but usually Expenses are 6-xxx
-        // Filter specifically for the requested breakdown or just show all Expenses
-        // User requested: Gaji, Listrik, Air, Lainnya. 
-        // These are Accounts created earlier.
-        
-        $bebanAccounts = Akun::where('tipe', 'Expense')
-            ->where('nama', 'NOT LIKE', 'Harga Pokok%') // Exclude standard HPP account if used
-            ->where('nama', '!=', 'Beban Pokok Penjualan') // Explicitly exclude this as requested
-            ->where('nama', 'NOT LIKE', 'Susut%') // Exclude Susut? Or keep it? User didn't mention it. Let's keep all Expenses to be safe.
+        // Hanya Beban Gaji, Beban Listrik, Beban Air sesuai request
+        $bebanAccounts = Coa::where('tipe', 'Expense')
+            ->where(function ($query) {
+                $query->where('nama', 'LIKE', '%Gaji%')
+                      ->orWhere('nama', 'LIKE', '%Listrik%')
+                      ->orWhere('nama', 'LIKE', '%Air%');
+            })
+            ->where('nama', 'NOT LIKE', '%Kematian%') // Pastikan tidak ada kematian ikan
             ->orderBy('kode')->get();
 
         $totalBebanOperasional = 0;
 
-        foreach ($bebanAccounts as $akun) {
-            $debit = JurnalDetail::where('akun_id', $akun->id)
+        foreach ($bebanAccounts as $coa) {
+            $debit = JurnalDetail::where('coa_id', $coa->id)
                 ->whereHas('jurnal', function ($q) use ($startDate, $endDate) {
                     $q->whereBetween('tanggal', [$startDate, $endDate]);
                 })->sum('debit');
 
-            $kredit = JurnalDetail::where('akun_id', $akun->id)
+            $kredit = JurnalDetail::where('coa_id', $coa->id)
                 ->whereHas('jurnal', function ($q) use ($startDate, $endDate) {
                     $q->whereBetween('tanggal', [$startDate, $endDate]);
                 })->sum('kredit');
 
-            $akun->saldo_periode = $debit - $kredit;
+            $coa->saldo_periode = $debit - $kredit;
             
-            // Only add to total if it has value
-            if ($akun->saldo_periode != 0) {
-                 $totalBebanOperasional += $akun->saldo_periode;
+            if ($coa->saldo_periode != 0) {
+                 $totalBebanOperasional += $coa->saldo_periode;
             }
         }
 
         // 4. LABA BERSIH
-        // Revenue - HPP - Operating Expenses
-        $labaBersih = $totalPendapatan - $totalHPP - $totalBebanOperasional;
+        // Revenue - Operating Expenses (HPP is removed)
+        $labaBersih = $totalPendapatan - $totalBebanOperasional;
 
         return view('laba_rugi.index', compact(
             'pendapatanAccounts', 
             'totalPendapatan', 
-            'hppComponents',
-            'totalHPP',
             'bebanAccounts', 
             'totalBebanOperasional', 
             'labaBersih',

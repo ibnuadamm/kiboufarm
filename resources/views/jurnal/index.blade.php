@@ -33,37 +33,54 @@
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold tracking-wider">
                     <th class="px-6 py-4 w-32">Tanggal</th>
-                    <th class="px-6 py-4">Keterangan</th>
-                    <th class="px-6 py-4 w-48">Akun / Referensi</th>
+                    <th class="px-6 py-4">Nama COA</th>
+                    <th class="px-6 py-4 w-28">Ref</th>
                     <th class="px-6 py-4 text-right w-36">Debit</th>
                     <th class="px-6 py-4 text-right w-36">Kredit</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody>
                 @forelse($jurnals as $jurnal)
-                    {{-- Header Row (Optional, usually we just list details) --}}
-                    {{-- Iterating details for flat view or nested view. Let's do a nested-like view for clarity --}}
-                    <tr class="bg-gray-50/50">
-                        <td class="px-6 py-4 font-medium text-gray-900 border-t border-gray-100" colspan="5">
-                            <span class="mr-2">{{ $jurnal->tanggal->format('d/m/Y') }}</span>
-                            {{ $jurnal->keterangan }}
-                        </td>
-                    </tr>
-                    @foreach($jurnal->details as $detail)
+                    @foreach($jurnal->details as $index => $detail)
                         <tr class="hover:bg-gray-50 bg-white transition-colors">
-                            <td class="px-6 py-2"></td>
-                            <td class="px-6 py-2"></td>
-                            <td class="px-6 py-2 font-mono text-sm text-gray-700">
-                                {{ $detail->akun->kode }} - {{ $detail->akun->nama }}
-                            </td>
-                            <td class="px-6 py-2 text-right text-gray-700">
-                                @if($detail->debit > 0)
-                                    Rp {{ number_format($detail->debit, 0, ',', '.') }}
+                            <!-- Tanggal -->
+                            <td class="px-6 py-3 text-sm text-gray-900 align-top {{ $index === 0 ? 'border-t border-gray-200' : '' }}">
+                                @if($index === 0)
+                                    <span class="font-medium text-gray-900">{{ $jurnal->tanggal->format('d/m/Y') }}</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-2 text-right text-gray-700">
+
+                            <!-- Nama COA -->
+                            <td class="px-6 py-3 align-top text-gray-900 {{ $index === 0 ? 'border-t border-gray-200' : '' }} {{ $detail->kredit > 0 ? 'pl-12' : 'font-medium' }}">
+                                {{ $detail->coa->nama }}
+                            </td>
+
+                            <!-- Ref (Kode COA) -->
+                            <td class="px-6 py-3 align-top font-mono text-sm text-gray-500 {{ $index === 0 ? 'border-t border-gray-200' : '' }}">
+                                {{ $detail->coa->kode }}
+                            </td>
+
+                            <!-- Debit -->
+                            <td class="px-6 py-3 align-top text-right text-gray-700 {{ $index === 0 ? 'border-t border-gray-200' : '' }}">
+                                @if($detail->debit > 0)
+                                    <div class="inline-flex justify-between w-32 text-sm">
+                                        <span class="text-gray-400 text-left">Rp</span>
+                                        <span class="text-right">{{ number_format($detail->debit, 0, ',', '.') }}</span>
+                                    </div>
+                                @else
+                                    <span class="text-gray-300 pr-2">-</span>
+                                @endif
+                            </td>
+
+                            <!-- Kredit -->
+                            <td class="px-6 py-3 align-top text-right text-gray-700 {{ $index === 0 ? 'border-t border-gray-200' : '' }}">
                                 @if($detail->kredit > 0)
-                                    Rp {{ number_format($detail->kredit, 0, ',', '.') }}
+                                    <div class="inline-flex justify-between w-32 text-sm">
+                                        <span class="text-gray-400 text-left">Rp</span>
+                                        <span class="text-right">{{ number_format($detail->kredit, 0, ',', '.') }}</span>
+                                    </div>
+                                @else
+                                    <span class="text-gray-300 pr-2">-</span>
                                 @endif
                             </td>
                         </tr>

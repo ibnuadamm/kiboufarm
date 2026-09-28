@@ -33,7 +33,7 @@
                     @forelse($pemberians as $item)
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->tanggal->format('d M Y') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">Kolam #{{ $item->kolam->nomor_kolam }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">Kolam {{ $item->kolam->nomor_kolam }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $item->persediaan->nama_barang }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $item->persediaan->kategori == 'Pakan' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">

@@ -25,8 +25,8 @@
                 <select name="kolam_id" id="kolam_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500" required>
                     <option value="">-- Pilih Kolam Siap Panen --</option>
                     @foreach($kolams as $kolam)
-                        <option value="{{ $kolam->id }}" {{ old('kolam_id') == $kolam->id ? 'selected' : '' }}>
-                            Kolam #{{ $kolam->nomor_kolam }} - {{ $kolam->persediaan->nama_barang }} ({{ $kolam->status }})
+                        <option value="{{ $kolam->id }}" data-jumlah="{{ $kolam->jumlah }}" {{ old('kolam_id') == $kolam->id ? 'selected' : '' }}>
+                            Kolam {{ $kolam->nomor_kolam }} - {{ $kolam->persediaan->nama_barang ?? 'Tanpa Bibit' }} (Sisa Ikan: {{ number_format($kolam->jumlah) }} ekor)
                         </option>
                     @endforeach
                 </select>
@@ -65,7 +65,7 @@
                 <!-- Jumlah Ekor -->
                 <div>
                     <label for="jumlah_ekor" class="block text-sm font-medium text-gray-700 mb-1">Jumlah Ekor <span class="text-red-500">*</span></label>
-                    <input type="number" name="jumlah_ekor" id="jumlah_ekor" value="{{ old('jumlah_ekor') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500" required>
+                    <input type="number" name="jumlah_ekor" id="jumlah_ekor" value="{{ old('jumlah_ekor') }}" class="w-full bg-gray-50 rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500" required readonly>
                     @error('jumlah_ekor') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
                 </div>
 
@@ -88,7 +88,18 @@
                     const harga = parseFloat(document.getElementById('harga_per_ekor').value) || 0;
                     document.getElementById('total_harga').value = ekor * harga;
                 }
+                
                 document.getElementById('jumlah_ekor').addEventListener('input', calculateTotal);
+
+                // Auto fill jumlah_ekor from selected pond's current fish count
+                document.getElementById('kolam_id').addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const jumlah = selectedOption.getAttribute('data-jumlah');
+                    if (jumlah !== null && jumlah !== undefined) {
+                        document.getElementById('jumlah_ekor').value = jumlah;
+                        calculateTotal();
+                    }
+                });
             </script>
 
             <div class="flex justify-end space-x-3 pt-6 border-t mt-4">

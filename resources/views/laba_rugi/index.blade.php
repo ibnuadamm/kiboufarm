@@ -44,11 +44,11 @@
             <div class="mb-8">
                 <h4 class="text-lg font-bold text-brand-700 mb-4 border-b border-brand-200 pb-2">PENDAPATAN</h4>
                 <div class="space-y-3">
-                    @foreach($pendapatanAccounts as $akun)
-                        @if($akun->saldo_periode != 0)
+                    @foreach($pendapatanAccounts as $coa)
+                        @if($coa->saldo_periode != 0)
                             <div class="flex justify-between text-gray-800">
-                                <span>{{ $akun->kode }} - {{ $akun->nama }}</span>
-                                <span class="font-mono">Rp {{ number_format($akun->saldo_periode, 0, ',', '.') }}</span>
+                                <span>{{ $coa->kode && $coa->kode !== '-' ? $coa->kode . ' - ' : '' }}{{ $coa->nama }}</span>
+                                <span class="font-mono">Rp {{ number_format($coa->saldo_periode, 0, ',', '.') }}</span>
                             </div>
                         @endif
                     @endforeach
@@ -59,42 +59,15 @@
                 </div>
             </div>
 
-            {{-- 2. HARGA POKOK PENJUALAN (HPP) --}}
-            <div class="mb-8">
-                <h4 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">HARGA POKOK PENJUALAN (HPP)</h4>
-                <div class="space-y-3">
-                    <div class="flex justify-between text-gray-800">
-                        <span>Bibit</span>
-                        <span class="font-mono">Rp {{ number_format($hppComponents['Bibit'], 0, ',', '.') }}</span>
-                    </div>
-                    <div class="flex justify-between text-gray-800">
-                        <span>Pakan</span>
-                        <span class="font-mono">Rp {{ number_format($hppComponents['Pakan'], 0, ',', '.') }}</span>
-                    </div>
-                    <div class="flex justify-between text-gray-800">
-                        <span>Obat</span>
-                        <span class="font-mono">Rp {{ number_format($hppComponents['Obat'], 0, ',', '.') }}</span>
-                    </div>
-                    <div class="flex justify-between text-gray-800">
-                        <span>Vitamin</span>
-                        <span class="font-mono">Rp {{ number_format($hppComponents['Vitamin'], 0, ',', '.') }}</span>
-                    </div>
-                </div>
-                <div class="flex justify-between font-bold text-gray-900 mt-4 pt-4 border-t border-gray-200 bg-gray-50/50 p-2 rounded">
-                    <span>TOTAL HPP</span>
-                    <span class="font-mono">Rp {{ number_format($totalHPP, 0, ',', '.') }}</span>
-                </div>
-            </div>
-
             {{-- 3. BEBAN OPERASIONAL --}}
             <div class="mb-8">
                 <h4 class="text-lg font-bold text-red-700 mb-4 border-b border-red-200 pb-2">BEBAN OPERASIONAL</h4>
                 <div class="space-y-3">
-                    @foreach($bebanAccounts as $akun)
-                        @if($akun->saldo_periode != 0)
+                    @foreach($bebanAccounts as $coa)
+                        @if($coa->saldo_periode != 0)
                             <div class="flex justify-between text-gray-800">
-                                <span>{{ $akun->nama }}</span> {{-- Simplify Name --}}
-                                <span class="font-mono">Rp {{ number_format($akun->saldo_periode, 0, ',', '.') }}</span>
+                                <span>{{ $coa->nama }}</span> {{-- Simplify Name --}}
+                                <span class="font-mono">Rp {{ number_format($coa->saldo_periode, 0, ',', '.') }}</span>
                             </div>
                         @endif
                     @endforeach

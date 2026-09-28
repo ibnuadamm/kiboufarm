@@ -20,8 +20,8 @@
                 @foreach($kematians as $k)
                 <tr>
                     <td class="px-6 py-4">{{ $k->tanggal->format('d M Y') }}</td>
-                    <td class="px-6 py-4 font-bold">Kolam #{{ $k->kolam->nomor_kolam }}</td>
-                    <td class="px-6 py-4 text-right text-red-600 font-bold">-{{ number_format($k->jumlah_ekor) }}</td>
+                    <td class="px-6 py-4 font-bold">Kolam {{ $k->kolam->nomor_kolam }}</td>
+                    <td class="px-6 py-4 text-right text-red-600 font-bold">{{ number_format($k->jumlah_ekor) }}</td>
                     <td class="px-6 py-4">{{ $k->catatan ?? '-' }}</td>
                 </tr>
                 @endforeach

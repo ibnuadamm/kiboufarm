@@ -46,10 +46,21 @@ class ModalController extends Controller
         $modal->tambahModal($setoran->jumlah);
 
         // 2. Buat Jurnal
-        $akunKas = \App\Models\Akun::where('nama', 'Kas')->first();
-        $akunModal = \App\Models\Akun::where('nama', 'Modal')->first();
+        $coaKas = \App\Models\Coa::where('nama', 'Kas')->orWhere('kode', '111')->first();
+        if ($coaKas) {
+            $coaKas->update(['kode' => '111', 'nama' => 'Kas']);
+        } else {
+            $coaKas = \App\Models\Coa::create(['kode' => '111', 'nama' => 'Kas', 'tipe' => 'Asset']);
+        }
 
-        if ($akunKas && $akunModal) {
+        $coaModal = \App\Models\Coa::where('nama', 'Modal')->orWhere('kode', '311')->first();
+        if ($coaModal) {
+            $coaModal->update(['kode' => '311', 'nama' => 'Modal']);
+        } else {
+            $coaModal = \App\Models\Coa::create(['kode' => '311', 'nama' => 'Modal', 'tipe' => 'Equity']);
+        }
+
+        if ($coaKas && $coaModal) {
             $jurnal = \App\Models\Jurnal::create([
                 'tanggal' => $setoran->tanggal,
                 'keterangan' => 'Setoran Modal: ' . ($setoran->keterangan ?? 'Setoran'),
@@ -59,14 +70,14 @@ class ModalController extends Controller
 
             \App\Models\JurnalDetail::create([
                 'jurnal_id' => $jurnal->id,
-                'akun_id' => $akunKas->id,
+                'coa_id' => $coaKas->id,
                 'debit' => $setoran->jumlah,
                 'kredit' => 0,
             ]);
 
             \App\Models\JurnalDetail::create([
                 'jurnal_id' => $jurnal->id,
-                'akun_id' => $akunModal->id,
+                'coa_id' => $coaModal->id,
                 'debit' => 0,
                 'kredit' => $setoran->jumlah,
             ]);

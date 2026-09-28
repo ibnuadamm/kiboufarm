@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Models\BiayaOperasional;
 use App\Models\Modal;
-use App\Models\Akun;
+use App\Models\Coa;
 use App\Models\Jurnal;
 use App\Models\JurnalDetail;
 
@@ -20,7 +20,6 @@ class BiayaOperasionalObserver
         $modal->kurangiModal($biaya->jumlah);
 
         // 2. Buat Jurnal Otomatis
-        // 2. Buat Jurnal Otomatis
         
         // Mapping Category to Account Name
         $kategori = trim($biaya->kategori);
@@ -34,7 +33,7 @@ class BiayaOperasionalObserver
                 $accountName = 'Beban Air';
                 break;
             case 'Gaji Karyawan':
-                $accountName = 'Beban Gaji Pegawai';
+                $accountName = 'Beban Gaji Karyawan';
                 break;
             case 'Lainnya':
                 $accountName = 'Beban Lain-lain';
@@ -46,10 +45,10 @@ class BiayaOperasionalObserver
                 break;
         }
 
-        $akunBeban = Akun::where('nama', $accountName)->first();
-        $akunKas = Akun::where('nama', 'Kas')->first();
+        $coaBeban = Coa::where('nama', $accountName)->first();
+        $coaKas = Coa::where('nama', 'Kas')->first();
 
-        if ($akunBeban && $akunKas) {
+        if ($coaBeban && $coaKas) {
             $jurnal = Jurnal::create([
                 'tanggal' => $biaya->tanggal,
                 'keterangan' => 'Biaya Operasional: ' . $biaya->keterangan . ' (' . $biaya->kategori . ')',
@@ -60,7 +59,7 @@ class BiayaOperasionalObserver
             // Debit Beban
             JurnalDetail::create([
                 'jurnal_id' => $jurnal->id,
-                'akun_id' => $akunBeban->id,
+                'coa_id' => $coaBeban->id,
                 'debit' => $biaya->jumlah,
                 'kredit' => 0,
             ]);
@@ -68,7 +67,7 @@ class BiayaOperasionalObserver
             // Kredit Kas
             JurnalDetail::create([
                 'jurnal_id' => $jurnal->id,
-                'akun_id' => $akunKas->id,
+                'coa_id' => $coaKas->id,
                 'debit' => 0,
                 'kredit' => $biaya->jumlah,
             ]);

@@ -8,7 +8,7 @@
 
         <!-- Source Info -->
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <h3 class="font-bold text-blue-800">Kolam Asal: #{{ $sourceKolam->nomor_kolam }}</h3>
+            <h3 class="font-bold text-blue-800">Kolam Asal: {{ $sourceKolam->nomor_kolam }}</h3>
             <p class="text-sm text-blue-700">Jumlah Ikan Saat Ini: <strong>{{ $sourceKolam->jumlah }}</strong> ekor</p>
             <p class="text-sm text-blue-700">Ukuran Saat Ini: {{ $sourceKolam->ukuran_ikan }}</p>
         </div>
@@ -25,7 +25,7 @@
                         <option value="">-- Pilih Kolam --</option>
                         @foreach($destKolams as $dest)
                             <option value="{{ $dest->id }}">
-                                Kolam #{{ $dest->nomor_kolam }} (Isi: {{ $dest->jumlah }} ekor, Status: {{ $dest->status }})
+                                Kolam {{ $dest->nomor_kolam }} (Isi: {{ $dest->jumlah }} ekor, Status: {{ $dest->status }})
                             </option>
                         @endforeach
                     </select>

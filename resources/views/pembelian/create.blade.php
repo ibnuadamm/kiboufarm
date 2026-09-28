@@ -74,7 +74,14 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label for="nomor_kolam" class="block text-sm font-medium text-teal-800 mb-1">Nomor Kolam <span class="text-red-500">*</span></label>
-                            <input type="number" name="nomor_kolam" id="nomor_kolam" placeholder="Contoh: 1" class="w-full rounded-md border-teal-300 focus:border-teal-500 focus:ring-teal-500">
+                            <select name="nomor_kolam" id="nomor_kolam" class="w-full rounded-md border-teal-300 focus:border-teal-500 focus:ring-teal-500">
+                                <option value="">-- Pilih Kolam --</option>
+                                @foreach($kolams as $kolam)
+                                    <option value="{{ $kolam->nomor_kolam }}" {{ old('nomor_kolam') == $kolam->nomor_kolam ? 'selected' : '' }}>
+                                        Kolam {{ $kolam->nomor_kolam }} (Status: {{ ucfirst(str_replace('_', ' ', $kolam->status)) }}, Isi: {{ $kolam->jumlah }} ekor)
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                         <div>
                             <label for="ukuran_ikan" class="block text-sm font-medium text-teal-800 mb-1">Ukuran Ikan <span class="text-red-500">*</span></label>

@@ -18,7 +18,7 @@ class PembelianController extends Controller
     {
         $persediaans = Persediaan::all();
         $modal = \App\Models\Modal::getSingleton();
-        $kolams = \App\Models\Kolam::where('status', '!=', 'panen')->get(); // Existing logic just in case useful
+        $kolams = \App\Models\Kolam::where('status', 'kosong')->orderBy('nomor_kolam')->get();
         $vendors = \App\Models\Vendor::all();
         return view('pembelian.create', compact('persediaans', 'modal', 'kolams', 'vendors'));
     }
@@ -32,7 +32,7 @@ class PembelianController extends Controller
             'harga_satuan' => 'required|numeric|min:0',
             'tanggal_pembelian' => 'required|date',
             // Optional Kolam fields (conditional validation manually handled or checked if present)
-            'nomor_kolam' => 'nullable|integer',
+            'nomor_kolam' => 'nullable|integer|exists:kolam,nomor_kolam',
             'ukuran_ikan' => 'nullable|string'
         ]);
 
@@ -52,27 +52,27 @@ class PembelianController extends Controller
         $persediaan = \App\Models\Persediaan::find($validated['persediaan_id']);
         
         if ($persediaan && $persediaan->kategori === 'Bibit' && !empty($request->nomor_kolam)) {
-            // Cek apakah ada siklus aktif untuk nomor kolam ini
-            $existingKolam = \App\Models\Kolam::where('nomor_kolam', $request->nomor_kolam)
-                ->where('status', '!=', 'panen')
-                ->latest('tanggal_tebar') // Ambil yang paling baru jika ada multiple (should be 1 active)
-                ->first();
+            // Cari kolam berdasarkan nomor_kolam yang dipilih
+            $existingKolam = \App\Models\Kolam::where('nomor_kolam', $request->nomor_kolam)->first();
 
             if ($existingKolam) {
-                // Attach to existing active cycle (Restocking)
-                $kolamId = $existingKolam->id;
-            } else {
-                // Create New Cycle
-                $newKolam = \App\Models\Kolam::create([
-                    'nomor_kolam' => $request->nomor_kolam,
+                $updateData = [
                     'persediaan_id' => $persediaan->id,
                     'tanggal_tebar' => $validated['tanggal_pembelian'],
-                    'jumlah' => 0, // Akan di-increment oleh Observer
-                    'jumlah_tebar' => 0, // Akan di-increment oleh Observer
                     'ukuran_ikan' => $request->ukuran_ikan ?? '-',
-                    'status' => 'dalam_pemeliharaan'
-                ]);
-                $kolamId = $newKolam->id;
+                    'status' => 'dalam_pemeliharaan',
+                    'tanggal_panen' => null,
+                ];
+
+                // Jika status sebelumnya kosong atau panen, reset jumlah agar stok baru terisi dengan tepat oleh Observer
+                if ($existingKolam->status === 'kosong' || $existingKolam->status === 'panen') {
+                    $updateData['jumlah'] = 0;
+                    $updateData['jumlah_tebar'] = 0;
+                    $updateData['jumlah_mati'] = 0;
+                }
+
+                $existingKolam->update($updateData);
+                $kolamId = $existingKolam->id;
             }
         }
 
@@ -89,7 +89,7 @@ class PembelianController extends Controller
 
         $message = 'Pembelian berhasil dicatat.';
         if ($kolamId) {
-            $message .= ' Stok ditambahkan ke Kolam #' . $request->nomor_kolam . '.';
+            $message .= ' Stok ditambahkan ke Kolam ' . $request->nomor_kolam . ' dan status berubah menjadi Dalam Pemeliharaan.';
         }
 
         return redirect()->route('pembelian.index')->with('success', $message);

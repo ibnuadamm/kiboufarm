@@ -81,7 +81,7 @@
                     <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-brand-500 {{ request()->routeIs('kolam.*') ? 'text-brand-500' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
-                    Master Siklus Kolam
+                    Master Data Kolam
                 </a>
 
                 <a href="{{ route('pemberian-pakan.index') }}" class="flex items-center px-4 py-3 text-orange-500 hover:bg-orange-50 hover:text-orange-700 rounded-lg transition-colors group {{ request()->routeIs('pemberian-pakan.*') ? 'bg-orange-50 text-orange-700 font-medium' : '' }}">
@@ -132,11 +132,18 @@
                     </svg>
                     Laporan Laba Rugi
                 </a>
+                <a href="{{ route('laporan-pendapatan-kolam.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-brand-50 hover:text-brand-700 rounded-lg transition-colors group {{ request()->routeIs('laporan-pendapatan-kolam.*') ? 'bg-brand-50 text-brand-700 font-medium' : '' }}">
+                    <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-brand-500 {{ request()->routeIs('laporan-pendapatan-kolam.*') ? 'text-brand-500' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                    </svg>
+                    Lap. Pendapatan Kolam
+                </a>
                 <a href="{{ route('coa.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-brand-50 hover:text-brand-700 rounded-lg transition-colors group {{ request()->routeIs('coa.*') ? 'bg-brand-50 text-brand-700 font-medium' : '' }}">
                     <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-brand-500 {{ request()->routeIs('coa.*') ? 'text-brand-500' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Master Data Akun (COA)
+                    Master Data COA
                 </a>
                 
                 <div class="border-t border-gray-200 my-4"></div>
@@ -170,6 +177,21 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-green-700">{{ session('success') }}</p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700">{{ session('error') }}</p>
                         </div>
                     </div>
                 </div>

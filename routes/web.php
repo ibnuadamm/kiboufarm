@@ -25,4 +25,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('jurnal', [App\Http\Controllers\JurnalController::class, 'index'])->name('jurnal.index');
     Route::resource('buku-besar', App\Http\Controllers\BukuBesarController::class)->only(['index']);
     Route::resource('laba-rugi', App\Http\Controllers\LabaRugiController::class)->only(['index']);
+    Route::get('laporan-pendapatan-kolam', [App\Http\Controllers\LaporanPendapatanKolamController::class, 'index'])->name('laporan-pendapatan-kolam.index');
 });

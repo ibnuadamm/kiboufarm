@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('biaya_operasionals', function (Blueprint $table) {
@@ -13,11 +16,14 @@ return new class extends Migration
             $table->string('keterangan');
             $table->decimal('jumlah', 15, 2);
             $table->date('tanggal');
-            $table->string('kategori')->default('Umum'); // Listrik, Air, Gaji, dll
+            $table->string('kategori')->default('Umum');
             $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('biaya_operasionals');

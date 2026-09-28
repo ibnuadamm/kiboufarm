@@ -9,15 +9,15 @@ class JurnalDetail extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['jurnal_id', 'akun_id', 'debit', 'kredit'];
+    protected $fillable = ['jurnal_id', 'coa_id', 'debit', 'kredit'];
 
     public function jurnal()
     {
         return $this->belongsTo(Jurnal::class);
     }
 
-    public function akun()
+    public function coa()
     {
-        return $this->belongsTo(Akun::class);
+        return $this->belongsTo(Coa::class, 'coa_id');
     }
 }

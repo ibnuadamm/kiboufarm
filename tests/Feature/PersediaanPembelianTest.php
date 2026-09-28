@@ -14,9 +14,10 @@ class PersediaanPembelianTest extends TestCase
 
     public function test_persediaan_can_be_created()
     {
-        $this->seed(\Database\Seeders\AkunSeeder::class);
+        $this->seed([\Database\Seeders\CoaSeeder::class, \Database\Seeders\ModalSeeder::class]);
+        $user = \App\Models\User::factory()->create();
         $this->withoutExceptionHandling();
-        $response = $this->post(route('persediaan.store'), [
+        $response = $this->actingAs($user)->post(route('persediaan.store'), [
             'nama_barang' => 'Pakan Lele A1',
             'kategori' => 'Pakan',
             'satuan' => 'Sak',
@@ -28,7 +29,9 @@ class PersediaanPembelianTest extends TestCase
 
     public function test_pembelian_updates_persediaan_stock()
     {
-        $this->seed(\Database\Seeders\AkunSeeder::class);
+        $this->seed([\Database\Seeders\CoaSeeder::class, \Database\Seeders\ModalSeeder::class]);
+        $user = \App\Models\User::factory()->create();
+        $vendor = \App\Models\Vendor::create(['nama' => 'Test Vendor']);
         // 1. Create Persediaan
         $persediaan = Persediaan::create([
             'nama_barang' => 'Pakan Lele A1',
@@ -43,8 +46,9 @@ class PersediaanPembelianTest extends TestCase
 
         // 2. Create Pembelian via POST request to controller (to test full flow) or direct model create
         // Let's test controller flow
-        $response = $this->post(route('pembelian.store'), [
+        $response = $this->actingAs($user)->post(route('pembelian.store'), [
             'persediaan_id' => $persediaan->id,
+            'vendor_id' => $vendor->id,
             'jumlah' => 10,
             'harga_satuan' => 200000,
             'tanggal_pembelian' => now()->toDateString(),
@@ -59,12 +63,13 @@ class PersediaanPembelianTest extends TestCase
         $this->assertEquals(10, $persediaan->stok_sisa);
         $this->assertDatabaseHas('pembelians', [
             'persediaan_id' => $persediaan->id,
+            'vendor_id' => $vendor->id,
             'jumlah' => 10,
             'total_harga' => 2000000,
         ]);
 
         // Verifikasi Jurnal Otomatis
-        // Pastikan Akun ada dulu (harus di-seed dalam test atau create manual)
+        // Pastikan COA ada dulu (harus di-seed dalam test atau create manual)
         // Karena test pakai RefreshDatabase, seed hilang. Kita harus seed di test atau setUp.
         
         $this->assertDatabaseHas('jurnals', [
@@ -73,8 +78,9 @@ class PersediaanPembelianTest extends TestCase
         ]);
 
         // 4. Add another purchase
-         $this->post(route('pembelian.store'), [
+         $this->actingAs($user)->post(route('pembelian.store'), [
             'persediaan_id' => $persediaan->id,
+            'vendor_id' => $vendor->id,
             'jumlah' => 5,
             'harga_satuan' => 210000,
             'tanggal_pembelian' => now()->toDateString(),

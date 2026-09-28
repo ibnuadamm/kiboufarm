@@ -9,7 +9,7 @@ class JurnalController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Jurnal::with('details.akun');
+        $query = Jurnal::with('details.coa');
 
         if ($request->start_date) {
             $query->whereDate('tanggal', '>=', $request->start_date);

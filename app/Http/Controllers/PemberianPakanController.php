@@ -17,7 +17,7 @@ class PemberianPakanController extends Controller
 
     public function create()
     {
-        $kolams = Kolam::where('status', '!=', 'panen')->get();
+        $kolams = Kolam::where('status', 'dalam_pemeliharaan')->get();
         // Filter persediaan: Only Pakan, Obat, Vitamin
         $barangs = Persediaan::whereIn('kategori', ['Pakan', 'Obat', 'Vitamin'])->where('stok_sisa', '>', 0)->get();
         

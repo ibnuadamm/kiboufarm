@@ -16,7 +16,7 @@ class KematianIkanController extends Controller
 
     public function create()
     {
-        $kolams = Kolam::where('status', '!=', 'panen')->get();
+        $kolams = Kolam::where('status', 'dalam_pemeliharaan')->get();
         return view('kematian.create', compact('kolams'));
     }
 

@@ -32,7 +32,8 @@
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                    <select name="kategori" class="w-full rounded-lg border-gray-300 focus:border-brand-500 focus:ring-brand-500">
+                    <select name="kategori" class="w-full rounded-lg border-gray-300 focus:border-brand-500 focus:ring-brand-500" required>
+                        <option value="" disabled selected>-- Pilih Kategori --</option>
                         <option value="Listrik">Listrik</option>
                         <option value="Air">Air</option>
                         <option value="Gaji Karyawan">Gaji Karyawan</option>

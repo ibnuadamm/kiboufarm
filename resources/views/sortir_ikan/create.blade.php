@@ -23,7 +23,7 @@
                         <option value="">-- Pilih Kolam Asal --</option>
                         @foreach($kolams as $k)
                             <option value="{{ $k->id }}" data-jumlah="{{ $k->jumlah }}" {{ old('kolam_asal_id') == $k->id ? 'selected' : '' }}>
-                                Kolam #{{ $k->nomor_kolam }} (Stok: {{ $k->jumlah }}, Status: {{ $k->status }})
+                                Kolam {{ $k->nomor_kolam }} (Stok: {{ $k->jumlah }}, Status: {{ $k->status }})
                             </option>
                         @endforeach
                     </select>
@@ -37,7 +37,7 @@
                         <option value="">-- Pilih Kolam Tujuan --</option>
                         @foreach($destKolams as $k)
                             <option value="{{ $k->id }}" {{ old('kolam_tujuan_id') == $k->id ? 'selected' : '' }}>
-                                Kolam #{{ $k->nomor_kolam }} (Isi: {{ $k->jumlah }}, Status: {{ $k->status }})
+                                Kolam {{ $k->nomor_kolam }} (Isi: {{ $k->jumlah }}, Status: {{ $k->status }})
                             </option>
                         @endforeach
                     </select>
